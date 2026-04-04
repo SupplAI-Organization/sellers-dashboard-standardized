@@ -46,6 +46,24 @@ export default function OnboardingPage() {
       return
     }
 
+    const { data: existingSupplier } = await supabase
+      .from("suppliers")
+      .select("id")
+      .eq("user_id", user.id)
+      .single()
+
+    if (!existingSupplier) {
+      const { error: supplierError } = await supabase
+        .from("suppliers")
+        .insert({ user_id: user.id, factory_header: form.business_name })
+
+      if (supplierError) {
+        setError(supplierError.message)
+        setLoading(false)
+        return
+      }
+    }
+
     router.push("/dashboard")
   }
 
