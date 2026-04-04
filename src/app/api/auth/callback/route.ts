@@ -10,9 +10,7 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code)
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (user && !user.user_metadata?.role) {
-      await supabase.auth.updateUser({ data: { role: "seller" } })
-
+    if (user) {
       const { data: existingUser } = await supabase
         .from("users")
         .select("id")
@@ -22,7 +20,7 @@ export async function GET(request: Request) {
       if (!existingUser) {
         const { data: newUser } = await supabase
           .from("users")
-          .insert({ id: user.id, email: user.email, role: "supplier" })
+          .insert({ id: user.id, email: user.email, role: "seller" })
           .select("id")
           .single()
 

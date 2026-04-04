@@ -8,16 +8,52 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
+type Mode = "signin" | "signup"
+
 export default function LoginPage() {
+  const [mode, setMode] = useState<Mode>("signin")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  async function handleSubmit() {
+    setError(null)
+    setSuccess(null)
+    setLoading(true)
+
+    if (mode === "signin") {
+      const { error } = await signIn(email, password)
+      if (error) setError(error.message)
+    } else {
+      const { error } = await signUp(email, password)
+      if (error) {
+        setError(error.message)
+      } else {
+        setSuccess("Account created! Check your email to confirm before signing in.")
+      }
+    }
+
+    setLoading(false)
+  }
+
+  function switchMode(next: Mode) {
+    setMode(next)
+    setError(null)
+    setSuccess(null)
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your seller account</CardDescription>
+          <CardTitle className="text-2xl">
+            {mode === "signin" ? "Welcome back" : "Create account"}
+          </CardTitle>
+          <CardDescription>
+            {mode === "signin" ? "Sign in to your seller account" : "Sign up as a seller"}
+          </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -43,8 +79,16 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button className="w-full" onClick={() => signIn(email, password)}>
-            Sign In
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
+          )}
+
+          {success && (
+            <p className="text-sm text-green-600">{success}</p>
+          )}
+
+          <Button className="w-full" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Please wait..." : mode === "signin" ? "Sign In" : "Sign Up"}
           </Button>
 
           <div className="relative">
@@ -67,13 +111,27 @@ export default function LoginPage() {
 
         <CardFooter className="justify-center">
           <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <button
-              className="text-foreground underline underline-offset-4 hover:text-primary"
-              onClick={() => signUp(email, password)}
-            >
-              Sign up
-            </button>
+            {mode === "signin" ? (
+              <>
+                Don&apos;t have an account?{" "}
+                <button
+                  className="text-foreground underline underline-offset-4 hover:text-primary"
+                  onClick={() => switchMode("signup")}
+                >
+                  Sign up
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{" "}
+                <button
+                  className="text-foreground underline underline-offset-4 hover:text-primary"
+                  onClick={() => switchMode("signin")}
+                >
+                  Sign in
+                </button>
+              </>
+            )}
           </p>
         </CardFooter>
       </Card>
