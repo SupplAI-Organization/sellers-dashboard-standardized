@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabaseServer"
+import LogoutButton from "@/components/auth/LogoutButton"
 
-export default async function Home() {
+export default async function Dashboard() {
   const supabase = await createClient()
 
   const {
@@ -22,5 +23,7 @@ export default async function Home() {
     redirect("/onboarding")
   }
 
-  return null
+  return <div>Welcome {user.email} 
+  <LogoutButton/> 
+  </div>
 }
