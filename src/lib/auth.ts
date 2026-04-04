@@ -23,10 +23,11 @@ export async function signIn(email: string, password: string) {
 
 // Google Login
 export async function signInWithGoogle() {
+  const origin = typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL
   return await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: "http://localhost:3000/api/auth/callback",
+      redirectTo: `${origin}/api/auth/callback`,
       queryParams: {
         role: "seller",
       },

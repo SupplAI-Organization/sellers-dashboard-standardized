@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { signIn, signUp, signInWithGoogle } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +12,7 @@ import { Separator } from "@/components/ui/separator"
 type Mode = "signin" | "signup"
 
 export default function LoginPage() {
+  const router = useRouter()
   const [mode, setMode] = useState<Mode>("signin")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -25,7 +27,11 @@ export default function LoginPage() {
 
     if (mode === "signin") {
       const { error } = await signIn(email, password)
-      if (error) setError(error.message)
+      if (error) {
+        setError(error.message)
+      } else {
+        router.push("/dashboard")
+      }
     } else {
       const { error } = await signUp(email, password)
       if (error) {
