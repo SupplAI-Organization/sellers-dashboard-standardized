@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function OnboardingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     business_name: "",
     gstin: "",
@@ -25,15 +26,25 @@ export default function OnboardingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setError(null)
     setLoading(true)
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) {
+      setError("Session expired. Please sign in again.")
+      setLoading(false)
+      return
+    }
 
-    await supabase
+    const { error } = await supabase
       .from("users")
-      .update(form)
-      .eq("id", user.id)
+      .upsert({ id: user.id, email: user.email, role: "seller", ...form })
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return
+    }
 
     router.push("/dashboard")
   }
@@ -67,6 +78,7 @@ export default function OnboardingPage() {
               <Label htmlFor="contact_number">Contact Number</Label>
               <Input id="contact_number" name="contact_number" required onChange={handleChange} />
             </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Saving..." : "Continue"}
             </Button>
