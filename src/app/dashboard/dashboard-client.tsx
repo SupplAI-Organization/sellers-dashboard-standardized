@@ -159,7 +159,7 @@ export default function DashboardClient({
                   type="text"
                   placeholder="Search..."
                   className="w-full max-w-md pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2"
-                  style={{backgroundColor: '#ffffff', borderColor: '#D2C1B6', borderWidth: '1px', focusRingColor: '#456882'}}
+                  style={{backgroundColor: '#ffffff', borderColor: '#D2C1B6', borderWidth: '1px'}}
                 />
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function DashboardClient({
           {/* Welcome Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-1" style={{color: '#1B3C53'}}>Welcome back, {displayName.split(" ")[0]} !</h1>
-            <p style={{color: '#666'}}>Here's Your Current Sales Overview</p>
+            <p style={{color: '#666'}}>Here is Your Current Sales Overview</p>
           </div>
 
           {/* Stats Cards */}
@@ -271,7 +271,7 @@ export default function DashboardClient({
               <CardContent className="p-6 space-y-4">
                 {topProductsByQuantity.length > 0 ? (
                   topProductsByQuantity.map((product) => (
-                    <div key={product.id} className="pb-4" style={{borderBottomColor: '#D2C1B6', borderBottomWidth: '1px', lastBorderColor: 'transparent'}}>
+                    <div key={product.id} className="pb-4 last:border-b-0" style={{borderBottomColor: '#D2C1B6', borderBottomWidth: '1px'}}>
                       <p className="font-semibold text-sm mb-1 line-clamp-2" style={{color: '#1B3C53'}}>{product.name}</p>
                       <p className="text-xs mb-1" style={{color: '#28a745'}}>{product.available_quantity} stocks remaining</p>
                       <p className="text-xs" style={{color: '#666'}}>{formatCurrency(product.price_per_unit)} per unit</p>
@@ -290,9 +290,9 @@ export default function DashboardClient({
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-semibold" style={{color: '#1B3C53'}}>Latest Orders</CardTitle>
                 <div className="flex items-center space-x-4">
-                  <button className="text-sm font-semibold" style={{color: '#666'}} className="hover:text-slate-900">Customize</button>
-                  <button className="text-sm font-semibold" style={{color: '#666'}} className="hover:text-slate-900">Filter</button>
-                  <button className="text-sm font-semibold" style={{color: '#666'}} className="hover:text-slate-900">Export</button>
+                  <button className="text-sm font-semibold hover:text-slate-900" style={{color: '#666'}}>Customize</button>
+                  <button className="text-sm font-semibold hover:text-slate-900" style={{color: '#666'}}>Filter</button>
+                  <button className="text-sm font-semibold hover:text-slate-900" style={{color: '#666'}}>Export</button>
                 </div>
               </div>
             </CardHeader>

@@ -190,7 +190,7 @@ export default function NewProductPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Information Card */}
         <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-lg">
-          <CardHeader className="pb-4" style={{borderBottomColor: '#D2C1B6'}} className="border-b">
+          <CardHeader className="pb-4 border-b" style={{borderBottomColor: '#D2C1B6'}}>
             <CardTitle className="text-xl" style={{color: '#1B3C53'}}>📋 Basic Information</CardTitle>
             <CardDescription style={{color: '#1B3C53'}}>Essential product details</CardDescription>
           </CardHeader>
@@ -273,7 +273,7 @@ export default function NewProductPage() {
 
         {/* Pricing & Stock Card */}
         <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-lg">
-          <CardHeader className="pb-4" style={{borderBottomColor: '#D2C1B6'}} className="border-b">
+          <CardHeader className="pb-4 border-b" style={{borderBottomColor: '#D2C1B6'}}>
             <CardTitle className="text-xl" style={{color: '#1B3C53'}}>💰 Pricing & Stock</CardTitle>
             <CardDescription style={{color: '#1B3C53'}}>Set your prices and available quantities</CardDescription>
           </CardHeader>
@@ -355,7 +355,7 @@ export default function NewProductPage() {
 
         {/* Quality & Origin Card */}
         <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-lg">
-          <CardHeader className="pb-4" style={{borderBottomColor: '#D2C1B6'}} className="border-b">
+          <CardHeader className="pb-4 border-b" style={{borderBottomColor: '#D2C1B6'}}>
             <CardTitle className="text-xl" style={{color: '#1B3C53'}}>✨ Quality & Origin</CardTitle>
             <CardDescription style={{color: '#1B3C53'}}>Product quality and origin information</CardDescription>
           </CardHeader>
@@ -452,7 +452,7 @@ export default function NewProductPage() {
 
         {/* Product Images Card */}
         <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-lg">
-          <CardHeader className="pb-4" style={{borderBottomColor: '#D2C1B6'}} className="border-b">
+          <CardHeader className="pb-4 border-b" style={{borderBottomColor: '#D2C1B6'}}>
             <CardTitle className="text-xl" style={{color: '#1B3C53'}}>📸 Product Images</CardTitle>
             <CardDescription style={{color: '#1B3C53'}}>Upload up to 5 product images (optional)</CardDescription>
           </CardHeader>

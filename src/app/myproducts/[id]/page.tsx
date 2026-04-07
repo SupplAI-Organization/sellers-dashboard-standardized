@@ -99,7 +99,7 @@ export default async function ProductDetailPage({
   return (
     <div className="space-y-8 py-8">
       {/* Top bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6" style={{borderBottomColor: '#D2C1B6'}} className="border-b">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b" style={{borderBottomColor: '#D2C1B6'}}>
         <div className="space-y-2">
           <Button variant="ghost" size="sm" asChild className="h-8 px-2" style={{color: '#1B3C53'}}>
             <Link href="/myproducts">← Back to Products</Link>
