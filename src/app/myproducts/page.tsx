@@ -6,10 +6,10 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardFooter,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Plus, Package, Edit, Eye, Trash2 } from "lucide-react"
 
 type Product = {
   id: string
@@ -19,27 +19,10 @@ type Product = {
   price_per_unit: number
   unit_type: string
   available_quantity: number
-  min_order_quantity: number | null
   is_listed: boolean | null
   is_approved: boolean | null
   availability_status: string
-  quality_grade: string | null
-  origin_country: string | null
-  origin_state: string | null
-  origin_district: string | null
-  packing_type: string | null
-  storage_type: string | null
-  transport_mode: string | null
-  certification: string | null
-  lead_time_days: number | null
-  image_urls: string | null
   listed_at: string | null
-}
-
-function availabilityColor(status: string) {
-  if (status === "in_stock") return "default"
-  if (status === "low_stock") return "outline"
-  return "destructive"
 }
 
 export default async function MyProductsPage() {
@@ -68,124 +51,142 @@ export default async function MyProductsPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">My Products</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          {products?.length ?? 0} product{products?.length !== 1 ? "s" : ""} listed
-        </p>
+    <div className="space-y-6 py-8 px-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight" style={{color: '#1B3C53'}}>My Products</h1>
+          <p className="text-sm" style={{color: '#666'}}>
+            Manage and track all your product listings
+          </p>
+        </div>
+        <Button asChild size="lg" className="text-white font-semibold shadow-md" style={{backgroundColor: '#1B3C53'}}>
+          <Link href="/myproducts/new">
+            <Plus className="h-5 w-5 mr-2" />
+            Add Product
+          </Link>
+        </Button>
       </div>
 
-      {!products || products.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">
-          No products listed yet.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(products as Product[]).map((product) => {
-            const firstImage = product.image_urls?.split(",")[0]?.trim()
+      {/* Stats */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Card style={{backgroundColor: '#F4EBD3'}} className="shadow-sm">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold" style={{color: '#1B3C53'}}>{products?.length ?? 0}</div>
+            <p className="text-xs mt-1" style={{color: '#666'}}>Total Products</p>
+          </CardContent>
+        </Card>
+        <Card style={{backgroundColor: '#F4EBD3'}} className="shadow-sm">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold" style={{color: '#1B3C53'}}>
+              {products?.filter(p => p.is_listed).length ?? 0}
+            </div>
+            <p className="text-xs mt-1" style={{color: '#666'}}>Listed</p>
+          </CardContent>
+        </Card>
+        <Card style={{backgroundColor: '#F4EBD3'}} className="shadow-sm">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold" style={{color: '#1B3C53'}}>
+              {products?.filter(p => p.is_approved).length ?? 0}
+            </div>
+            <p className="text-xs mt-1" style={{color: '#666'}}>Approved</p>
+          </CardContent>
+        </Card>
+        <Card style={{backgroundColor: '#F4EBD3'}} className="shadow-sm">
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold" style={{color: '#1B3C53'}}>
+              {products?.filter(p => p.availability_status === "in_stock").length ?? 0}
+            </div>
+            <p className="text-xs mt-1" style={{color: '#666'}}>In Stock</p>
+          </CardContent>
+        </Card>
+      </div>
 
-            return (
-              <Link key={product.id} href={`/myproducts/${product.id}`} className="block h-full">
-              <Card className="group h-full overflow-hidden hover:ring-2 hover:ring-primary/40 transition-shadow">
-                {firstImage ? (
-                  <div className="relative w-full aspect-16/10 overflow-hidden bg-muted/60">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={firstImage}
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full aspect-16/10 bg-muted/60 flex items-center justify-center">
-                    <span className="text-sm text-muted-foreground">No image</span>
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle>{product.name}</CardTitle>
-                  <CardDescription>{product.category}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {product.description && (
-                    <p className="text-muted-foreground text-sm line-clamp-2">
-                      {product.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold">
-                      ₹{Number(product.price_per_unit).toLocaleString("en-IN")}{" "}
-                      <span className="text-sm font-normal text-muted-foreground">
-                        / {product.unit_type}
-                      </span>
-                    </span>
-                    <Badge variant={availabilityColor(product.availability_status)}>
-                      {product.availability_status.replace("_", " ")}
-                    </Badge>
-                  </div>
-
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <div>
-                      Qty available:{" "}
-                      <span className="text-foreground font-medium">
-                        {product.available_quantity} {product.unit_type}
-                      </span>
-                    </div>
-                    {product.min_order_quantity && (
-                      <div>
-                        Min order:{" "}
-                        <span className="text-foreground font-medium">
-                          {product.min_order_quantity} {product.unit_type}
-                        </span>
-                      </div>
-                    )}
-                    {(product.origin_state || product.origin_country) && (
-                      <div>
-                        Origin:{" "}
-                        <span className="text-foreground font-medium">
-                          {[product.origin_district, product.origin_state, product.origin_country]
-                            .filter(Boolean)
-                            .join(", ")}
-                        </span>
-                      </div>
-                    )}
-                    {product.lead_time_days != null && (
-                      <div>
-                        Lead time:{" "}
-                        <span className="text-foreground font-medium">
-                          {product.lead_time_days} day{product.lead_time_days !== 1 ? "s" : ""}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {product.quality_grade && (
-                      <Badge variant="secondary">{product.quality_grade}</Badge>
-                    )}
-                    {product.certification && (
-                      <Badge variant="secondary">{product.certification}</Badge>
-                    )}
-                    {product.packing_type && (
-                      <Badge variant="outline">{product.packing_type}</Badge>
-                    )}
-                  </div>
-                </CardContent>
-                <CardFooter className="justify-between text-xs text-muted-foreground">
-                  <span>
-                    {product.is_approved ? "Approved" : "Pending approval"}
-                  </span>
-                  <span>
-                    {product.is_listed ? "Listed" : "Unlisted"}
-                  </span>
-                </CardFooter>
-              </Card>
-              </Link>
-            )
-          })}
-        </div>
-      )}
+      {/* Products Table */}
+      <Card style={{borderColor: '#D2C1B6'}}>
+        <CardHeader style={{backgroundColor: '#F4EBD3', borderBottomColor: '#D2C1B6'}} className="border-b">
+          <CardTitle style={{color: '#1B3C53'}}>Product Inventory</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {!products || products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Package className="h-12 w-12 mb-3" style={{color: '#1B3C53'}} />
+              <h3 className="text-lg font-semibold mb-2" style={{color: '#1B3C53'}}>No products yet</h3>
+              <p style={{color: '#666'}} className="mb-4">Start selling by adding your first product</p>
+              <Button asChild size="sm" className="text-white" style={{backgroundColor: '#1B3C53'}}>
+                <Link href="/myproducts/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Product
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr style={{backgroundColor: '#F4EBD3', borderBottomColor: '#D2C1B6'}} className="border-b">
+                    <th className="text-left py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Product Name</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Category</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Price</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Stock</th>
+                    <th className="text-left py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Status</th>
+                    <th className="text-center py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(products as Product[]).map((product, idx) => (
+                    <tr 
+                      key={product.id} 
+                      style={{borderBottomColor: '#D2C1B6'}} 
+                      className="border-b hover:bg-slate-50 transition-colors"
+                    >
+                      <td className="py-4 px-4">
+                        <Link href={`/myproducts/${product.id}`} className="hover:underline">
+                          <div className="font-medium text-sm" style={{color: '#1B3C53'}}>{product.name}</div>
+                          <div className="text-xs" style={{color: '#999'}}>ID: {product.id.substring(0, 8)}</div>
+                        </Link>
+                      </td>
+                      <td className="py-4 px-4 text-sm" style={{color: '#666'}}>{product.category}</td>
+                      <td className="py-4 px-4 text-sm font-semibold" style={{color: '#1B3C53'}}>₹{Number(product.price_per_unit).toLocaleString("en-IN")} / {product.unit_type}</td>
+                      <td className="py-4 px-4 text-sm">
+                        <div className="font-semibold" style={{color: '#1B3C53'}}>{product.available_quantity}</div>
+                        <div className="text-xs" style={{color: '#999'}}>{product.unit_type}</div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="space-y-1">
+                          {product.is_approved ? (
+                            <Badge style={{backgroundColor: '#F4EBD3', color: '#1B3C53'}} className="text-xs">Approved</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs">Pending</Badge>
+                          )}
+                          {product.is_listed ? (
+                            <Badge style={{backgroundColor: '#F4EBD3', color: '#1B3C53'}} className="text-xs">Listed</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">Unlisted</Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <Link href={`/myproducts/${product.id}`}>
+                            <Eye className="h-4 w-4 hover:opacity-70" style={{color: '#1B3C53'}} />
+                          </Link>
+                          <Link href={`/myproducts/${product.id}`}>
+                            <Edit className="h-4 w-4 hover:opacity-70" style={{color: '#1B3C53'}} />
+                          </Link>
+                          <button className="hover:opacity-70">
+                            <Trash2 className="h-4 w-4" style={{color: '#1B3C53'}} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

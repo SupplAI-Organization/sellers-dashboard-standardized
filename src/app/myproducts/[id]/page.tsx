@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import MessagesSheet from "@/components/MessagesSheet"
+import { Edit } from "lucide-react"
 
 type Product = {
   id: string
@@ -51,9 +52,9 @@ function availabilityColor(status: string): "default" | "outline" | "destructive
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex justify-between gap-4 py-2.5 text-sm">
-      <span className="text-muted-foreground shrink-0">{label}</span>
-      <span className="text-right font-medium">{value}</span>
+    <div className="flex justify-between gap-4 py-3 text-sm">
+      <span className="shrink-0 font-medium" style={{color: '#1B3C53'}}>{label}</span>
+      <span className="text-right font-semibold" style={{color: '#1B3C53'}}>{value}</span>
     </div>
   )
 }
@@ -96,251 +97,266 @@ export default async function ProductDetailPage({
     : []
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="space-y-8 py-8">
       {/* Top bar */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
-        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/myproducts">← My Products</Link>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6" style={{borderBottomColor: '#D2C1B6'}} className="border-b">
+        <div className="space-y-2">
+          <Button variant="ghost" size="sm" asChild className="h-8 px-2" style={{color: '#1B3C53'}}>
+            <Link href="/myproducts">← Back to Products</Link>
           </Button>
-          <Separator orientation="vertical" className="h-4" />
-          <span className="text-sm text-muted-foreground truncate flex-1">{p.name}</span>
+          <h1 className="text-4xl font-bold tracking-tight" style={{color: '#1B3C53'}}>{p.name}</h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" size="sm" style={{borderColor: '#D2C1B6', color: '#1B3C53'}}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
           <MessagesSheet productId={p.id} userId={user.id} />
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        {/* Hero section */}
-        <div className="flex flex-col sm:flex-row gap-8">
-          {/* Image */}
-          <div className="sm:w-72 md:w-80 sm:shrink-0">
-            {primaryImage ? (
-              <div className="relative w-full max-w-md mx-auto sm:mx-0 aspect-4/3 sm:aspect-square rounded-2xl overflow-hidden bg-muted/70 ring-1 ring-border shadow-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={primaryImage}
-                  alt={p.name}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-[1.03]"
-                />
-              </div>
-            ) : (
-              <div className="w-full max-w-md mx-auto sm:mx-0 aspect-4/3 sm:aspect-square rounded-2xl bg-muted/70 flex items-center justify-center ring-1 ring-border shadow-sm">
-                <span className="text-muted-foreground text-sm">No image</span>
-              </div>
-            )}
+      {/* Hero section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Images */}
+        <div className="md:col-span-1 space-y-4">
+          {primaryImage ? (
+            <div className="relative w-full aspect-square rounded-xl overflow-hidden ring-1 shadow-md" style={{backgroundColor: '#F5F5F5', borderColor: '#D2C1B6'}}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={primaryImage}
+                alt={p.name}
+                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              />
+            </div>
+          ) : (
+            <div className="w-full aspect-square rounded-xl flex items-center justify-center ring-1 shadow-md" style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}}>
+              <span style={{color: '#1B3C53'}} className="text-sm">No image</span>
+            </div>
+          )}
 
-            {/* Thumbnail strip */}
-            {images.length > 1 && (
-              <div className="mt-3 flex gap-2.5 overflow-x-auto pb-1">
-                {images.map((url, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={i}
-                    src={url}
-                    alt={`${p.name} ${i + 1}`}
-                    loading="lazy"
-                    className="h-16 w-16 rounded-xl object-cover shrink-0 ring-1 ring-border bg-muted/60 opacity-85 hover:opacity-100 transition-opacity"
-                  />
-                ))}
-              </div>
-            )}
+          {/* Thumbnail strip */}
+          {images.length > 1 && (
+            <div className="flex gap-2.5 overflow-x-auto pb-2">
+              {images.map((url, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={url}
+                  alt={`${p.name} ${i + 1}`}
+                  loading="lazy"
+                  className="h-24 w-24 rounded-lg object-cover shrink-0 ring-1 bg-slate-100 opacity-75 hover:opacity-100 transition-opacity cursor-pointer"
+                  style={{borderColor: '#D2C1B6', backgroundColor: '#F5F5F5'}}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Product info */}
+        <div className="md:col-span-2 space-y-6">
+          <div className="space-y-3">
+            <p className="text-sm uppercase tracking-wider font-semibold" style={{color: '#1B3C53'}}>
+              {p.category}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant={availabilityColor(p.availability_status)} className="font-semibold">
+                {p.availability_status.replace(/_/g, " ").toUpperCase()}
+              </Badge>
+              <Badge variant={p.is_approved ? "default" : "outline"} className="font-semibold">
+                {p.is_approved ? "✓ APPROVED" : "PENDING"}
+              </Badge>
+              <Badge variant={p.is_listed ? "secondary" : "outline"} className="font-semibold">
+                {p.is_listed ? "LISTED" : "UNLISTED"}
+              </Badge>
+            </div>
           </div>
 
-          {/* Product info */}
-          <div className="flex-1 space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">{p.category}</p>
-              <h1 className="text-2xl font-semibold leading-tight">{p.name}</h1>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Badge variant={availabilityColor(p.availability_status)}>
-                {p.availability_status.replace(/_/g, " ")}
-              </Badge>
-              <Badge variant={p.is_approved ? "default" : "outline"}>
-                {p.is_approved ? "Approved" : "Pending approval"}
-              </Badge>
-              <Badge variant={p.is_listed ? "secondary" : "outline"}>
-                {p.is_listed ? "Listed" : "Unlisted"}
-              </Badge>
-            </div>
-
-            <div className="text-3xl font-bold">
+          <div className="space-y-1">
+            <p className="text-sm font-medium" style={{color: '#1B3C53'}}>Price per unit</p>
+            <div className="text-5xl font-bold" style={{color: '#1B3C53'}}>
               ₹{Number(p.price_per_unit).toLocaleString("en-IN")}
-              <span className="text-base font-normal text-muted-foreground ml-1">
+              <span className="text-xl font-normal ml-3" style={{color: '#1B3C53'}}>
                 / {p.unit_type}
               </span>
             </div>
+          </div>
 
-            {p.description && (
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {p.description}
-              </p>
+          {p.description && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium" style={{color: '#1B3C53'}}>Description</p>
+              <p style={{color: '#1B3C53'}} className="text-base leading-relaxed">{p.description}</p>
+            </div>
+          )}
+
+          {/* Quick stats grid */}
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-sm">
+              <CardContent className="pt-4">
+                <p className="text-xs font-semibold" style={{color: '#1B3C53'}}>AVAILABLE STOCK</p>
+                <p className="text-3xl font-bold mt-2" style={{color: '#1B3C53'}}>
+                  {p.available_quantity}
+                </p>
+                <p className="text-xs mt-1" style={{color: '#1B3C53'}}>{p.unit_type}</p>
+              </CardContent>
+            </Card>
+
+            {p.min_order_quantity != null && (
+              <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-sm">
+                <CardContent className="pt-4">
+                  <p className="text-xs font-semibold" style={{color: '#1B3C53'}}>MINIMUM ORDER</p>
+                  <p className="text-3xl font-bold mt-2" style={{color: '#1B3C53'}}>
+                    {p.min_order_quantity}
+                  </p>
+                  <p className="text-xs mt-1" style={{color: '#1B3C53'}}>{p.unit_type}</p>
+                </CardContent>
+              </Card>
             )}
 
-            {/* Quick stats */}
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <div className="rounded-lg bg-muted/60 px-4 py-3">
-                <p className="text-xs text-muted-foreground">Available</p>
-                <p className="font-semibold mt-0.5">
-                  {p.available_quantity} {p.unit_type}
-                </p>
-              </div>
-              {p.min_order_quantity != null && (
-                <div className="rounded-lg bg-muted/60 px-4 py-3">
-                  <p className="text-xs text-muted-foreground">Min. order</p>
-                  <p className="font-semibold mt-0.5">
-                    {p.min_order_quantity} {p.unit_type}
-                  </p>
-                </div>
-              )}
-              {p.lead_time_days != null && (
-                <div className="rounded-lg bg-muted/60 px-4 py-3">
-                  <p className="text-xs text-muted-foreground">Lead time</p>
-                  <p className="font-semibold mt-0.5">
-                    {p.lead_time_days} day{p.lead_time_days !== 1 ? "s" : ""}
-                  </p>
-                </div>
-              )}
-              {origin && (
-                <div className="rounded-lg bg-muted/60 px-4 py-3">
-                  <p className="text-xs text-muted-foreground">Origin</p>
-                  <p className="font-semibold mt-0.5 truncate">{origin}</p>
-                </div>
-              )}
-            </div>
+            {p.lead_time_days != null && (
+              <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-sm">
+                <CardContent className="pt-4">
+                  <p className="text-xs font-semibold" style={{color: '#1B3C53'}}>LEAD TIME</p>
+                  <p className="text-3xl font-bold mt-2" style={{color: '#1B3C53'}}>{p.lead_time_days}</p>
+                  <p className="text-xs mt-1" style={{color: '#1B3C53'}}>days</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {origin && (
+              <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-sm">
+                <CardContent className="pt-4">
+                  <p className="text-xs font-semibold" style={{color: '#1B3C53'}}>ORIGIN</p>
+                  <p className="text-sm font-bold mt-2 truncate" style={{color: '#1B3C53'}}>{origin}</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
-
-        {/* Detail grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Pricing & Stock */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Pricing & Stock</CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y divide-border pt-0">
-              <DetailRow
-                label="Price per unit"
-                value={`₹${Number(p.price_per_unit).toLocaleString("en-IN")} / ${p.unit_type}`}
-              />
-              <DetailRow
-                label="Available quantity"
-                value={`${p.available_quantity} ${p.unit_type}`}
-              />
-              {p.min_order_quantity != null && (
-                <DetailRow
-                  label="Min. order quantity"
-                  value={`${p.min_order_quantity} ${p.unit_type}`}
-                />
-              )}
-              {p.reorder_threshold != null && (
-                <DetailRow
-                  label="Reorder threshold"
-                  value={`${p.reorder_threshold} ${p.unit_type}`}
-                />
-              )}
-              {p.lead_time_days != null && (
-                <DetailRow
-                  label="Lead time"
-                  value={`${p.lead_time_days} day${p.lead_time_days !== 1 ? "s" : ""}`}
-                />
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Origin & Logistics */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Origin & Logistics</CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y divide-border pt-0">
-              {origin && <DetailRow label="Origin" value={origin} />}
-              {p.source_name && <DetailRow label="Source" value={p.source_name} />}
-              {p.packing_type && <DetailRow label="Packing type" value={p.packing_type} />}
-              {p.storage_type && <DetailRow label="Storage type" value={p.storage_type} />}
-              {p.transport_mode && <DetailRow label="Transport mode" value={p.transport_mode} />}
-            </CardContent>
-          </Card>
-
-          {/* Quality & Compliance */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Quality & Compliance</CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y divide-border pt-0">
-              {p.quality_grade && <DetailRow label="Quality grade" value={p.quality_grade} />}
-              {p.certification && <DetailRow label="Certification" value={p.certification} />}
-              <DetailRow
-                label="Test report"
-                value={p.test_report_available ? "Available" : "Not available"}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Listing info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Listing Info</CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y divide-border pt-0">
-              {p.listed_at && (
-                <DetailRow
-                  label="Listed at"
-                  value={new Date(p.listed_at).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                />
-              )}
-              {p.created_at && (
-                <DetailRow
-                  label="Created"
-                  value={new Date(p.created_at).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                />
-              )}
-              {p.updated_at && (
-                <DetailRow
-                  label="Last updated"
-                  value={new Date(p.updated_at).toLocaleDateString("en-IN", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                />
-              )}
-              <DetailRow
-                label="Product ID"
-                value={<span className="font-mono text-xs">{p.id}</span>}
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Dynamic attributes */}
-        {dynamicEntries.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Additional Attributes</CardTitle>
-            </CardHeader>
-            <CardContent className="divide-y divide-border pt-0">
-              {dynamicEntries.map(([key, val]) => (
-                <DetailRow
-                  key={key}
-                  label={key.replace(/_/g, " ")}
-                  value={String(val)}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        )}
       </div>
 
+      {/* Detail cards grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 shadow-sm">
+        {/* Pricing & Stock */}
+        <Card style={{borderColor: '#D2C1B6'}}>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Pricing & Stock</CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
+            <DetailRow
+              label="Price per unit"
+              value={`₹${Number(p.price_per_unit).toLocaleString("en-IN")} / ${p.unit_type}`}
+            />
+            <DetailRow
+              label="Available quantity"
+              value={`${p.available_quantity} ${p.unit_type}`}
+            />
+            {p.min_order_quantity != null && (
+              <DetailRow
+                label="Min. order quantity"
+                value={`${p.min_order_quantity} ${p.unit_type}`}
+              />
+            )}
+            {p.reorder_threshold != null && (
+              <DetailRow
+                label="Reorder threshold"
+                value={`${p.reorder_threshold} ${p.unit_type}`}
+              />
+            )}
+            {p.lead_time_days != null && (
+              <DetailRow
+                label="Lead time"
+                value={`${p.lead_time_days} day${p.lead_time_days !== 1 ? "s" : ""}`}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Origin & Logistics */}
+        <Card style={{borderColor: '#D2C1B6'}}>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Origin & Logistics</CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
+            {origin && <DetailRow label="Origin" value={origin} />}
+            {p.source_name && <DetailRow label="Source" value={p.source_name} />}
+            {p.packing_type && <DetailRow label="Packing type" value={p.packing_type} />}
+            {p.storage_type && <DetailRow label="Storage type" value={p.storage_type} />}
+            {p.transport_mode && <DetailRow label="Transport mode" value={p.transport_mode} />}
+          </CardContent>
+        </Card>
+
+        {/* Quality & Compliance */}
+        <Card style={{borderColor: '#D2C1B6'}}>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Quality & Compliance</CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
+            {p.quality_grade && <DetailRow label="Quality grade" value={p.quality_grade} />}
+            {p.certification && <DetailRow label="Certification" value={p.certification} />}
+            <DetailRow
+              label="Test report"
+              value={p.test_report_available ? "✓ Available" : "Not available"}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Listing info */}
+        <Card style={{borderColor: '#D2C1B6'}}>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Listing Info</CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
+            {p.listed_at && (
+              <DetailRow
+                label="Listed at"
+                value={new Date(p.listed_at).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              />
+            )}
+            {p.created_at && (
+              <DetailRow
+                label="Created"
+                value={new Date(p.created_at).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              />
+            )}
+            {p.updated_at && (
+              <DetailRow
+                label="Last updated"
+                value={new Date(p.updated_at).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Dynamic attributes */}
+      {dynamicEntries.length > 0 && (
+        <Card style={{borderColor: '#D2C1B6'}}>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Additional Attributes</CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
+            {dynamicEntries.map(([key, val]) => (
+              <DetailRow
+                key={key}
+                label={key.replace(/_/g, " ")}
+                value={String(val)}
+              />
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
