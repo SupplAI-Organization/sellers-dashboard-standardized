@@ -1,17 +1,15 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { Package, ShoppingCart, TrendingUp, Grid3x3, Search, Settings, LogOut, Menu, X } from "lucide-react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
-import MessagesSheet from "@/components/MessagesSheet"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { Package, Search, ShoppingCart, TrendingUp } from "lucide-react"
+
 
 interface DashboardClientProps {
   displayName: string
   displayEmail: string
-  userId: string
   chartData: Array<{ name: string; revenue: number; order: number }>
   orders: Array<{
     id: string
@@ -40,22 +38,23 @@ interface DashboardClientProps {
 export default function DashboardClient({
   displayName,
   displayEmail,
-  userId,
   chartData,
   orders,
   products,
   stats,
 }: DashboardClientProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const router = useRouter()
+  const [userName, setUserName] = useState(displayName)
+  const [userEmail, setUserEmail] = useState(displayEmail)
 
-  const menuItems = [
-    { label: "Overview", icon: Grid3x3, active: true, href: "/dashboard" },
-    { label: "Products", icon: Package, active: false, href: "/myproducts" },
-    { label: "Customer", icon: ShoppingCart, active: false, href: "#" },
-    { label: "Orders", icon: ShoppingCart, active: false, href: "#" },
-    { label: "Shipment", icon: TrendingUp, active: false, href: "#" },
-  ]
+  // Update user name and email when props change (from server)
+  useEffect(() => {
+    if (displayName) {
+      setUserName(displayName)
+    }
+    if (displayEmail) {
+      setUserEmail(displayEmail)
+    }
+  }, [displayName, displayEmail])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -79,79 +78,10 @@ export default function DashboardClient({
     .slice(0, 3)
 
   return (
-    <div className="flex h-screen bg-white">
-      {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 text-white transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:relative md:translate-x-0`}
-        style={{backgroundColor: '#1B3C53'}}
-      >
-        <div className="p-6">
-          <h2 className="text-2xl font-bold">SupplAI</h2>
-        </div>
-
-        <nav className="space-y-1 px-3 py-8">
-          {menuItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors text-white"
-              style={{
-                backgroundColor: item.active ? '#456882' : 'transparent',
-                color: item.active ? 'white' : '#cbd5e1'
-              }}
-              onMouseEnter={(e) => {
-                if (!item.active) e.currentTarget.style.backgroundColor = 'white'
-              }}
-              onMouseLeave={(e) => {
-                if (!item.active) e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        {/* Bottom Menu */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
-          <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-300 hover:text-slate-900 hover:bg-white transition-colors">
-            <Settings className="h-5 w-5" />
-            <span className="font-medium">Store Setting</span>
-          </button>
-          <button
-            onClick={async () => {
-              const { getSupabaseClient } = await import("@/lib/supabaseClient")
-              const supabase = getSupabaseClient()
-              await supabase.auth.signOut()
-              router.push("/login")
-            }}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-300 hover:text-slate-900 hover:bg-white transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            <span className="font-medium">Logout</span>
-          </button>
-        </div>
-
-        {/* Upgrade Pro Card */}
-        <div className="absolute left-4 right-4 rounded-lg p-4" style={{backgroundColor: '#456882', borderColor: '#D2C1B6', borderWidth: '1px', bottom: '120px'}}>
-          <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center mb-3">
-            <span className="text-2xl">🚀</span>
-          </div>
-          <h3 className="font-bold text-white mb-1">Upgrade Pro</h3>
-          <p className="text-xs text-slate-100 mb-3">Discover new features to detailed report and analysis</p>
-          <button className="w-full bg-white text-blue-900 rounded-lg py-2 font-semibold hover:bg-slate-100 transition" style={{color: '#1B3C53'}}>
-            Upgrade Now
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto" style={{backgroundColor: '#F4EBD3'}}>
-        <div className="p-8">
-          {/* Top Bar */}
-          <div className="flex items-center justify-between mb-8">
+    <div className="flex-1 overflow-auto w-full" style={{backgroundColor: '#F9E7B2'}}>
+      <div className="p-4 md:p-8">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between mb-8">
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-5 w-5" style={{color: '#D2C1B6'}} />
@@ -164,18 +94,17 @@ export default function DashboardClient({
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <MessagesSheet productId={products.length > 0 ? products[0].id : undefined} userId={userId} />
               <button className="w-10 h-10 rounded-full" style={{backgroundColor: '#D2C1B6'}}></button>
               <div className="text-right">
-                <p className="font-semibold" style={{color: '#1B3C53'}}>{displayName}</p>
-                <p className="text-sm" style={{color: '#666'}}>{displayEmail}</p>
+                <p className="font-semibold" style={{color: '#1B3C53'}}>{userName}</p>
+                <p className="text-sm" style={{color: '#666'}}>{userEmail}</p>
               </div>
             </div>
           </div>
 
           {/* Welcome Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-1" style={{color: '#1B3C53'}}>Welcome back, {displayName.split(" ")[0]} !</h1>
+            <h1 className="text-4xl font-bold mb-1" style={{color: '#1B3C53'}}>Welcome back, {userName.split(" ")[0]} !</h1>
             <p style={{color: '#666'}}>Here is Your Current Sales Overview</p>
           </div>
 
@@ -196,31 +125,31 @@ export default function DashboardClient({
               </CardContent>
             </Card>
 
-            <Card className="rounded-xl" style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6', borderWidth: '2px'}}>
+            <Card className="text-white rounded-xl" style={{backgroundColor: '#1B3C53'}}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium mb-2" style={{color: '#666'}}>Total Orders</p>
-                    <p className="text-4xl font-bold mb-1" style={{color: '#1B3C53'}}>{stats.totalOrders}</p>
-                    <p className="text-xs" style={{color: '#666'}}>-1.18% <span style={{color: '#999'}}>From last month</span></p>
+                    <p className="text-slate-300 text-sm font-medium mb-2">Total Orders</p>
+                    <p className="text-4xl font-bold mb-1">{stats.totalOrders}</p>
+                    <p className="text-xs text-slate-400">-1.18% <span className="text-slate-500">From last month</span></p>
                   </div>
-                  <div className="p-3 rounded-lg" style={{backgroundColor: '#F4EBD3'}}>
-                    <ShoppingCart className="h-5 w-5" style={{color: '#1B3C53'}} />
+                  <div className="p-3 rounded-lg" style={{backgroundColor: '#456882'}}>
+                    <ShoppingCart className="h-5 w-5" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="rounded-xl" style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6', borderWidth: '2px'}}>
+            <Card className="text-white rounded-xl" style={{backgroundColor: '#1B3C53'}}>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-medium mb-2" style={{color: '#666'}}>Lifetime Value</p>
-                    <p className="text-4xl font-bold mb-1" style={{color: '#1B3C53'}}>{formatCurrency(stats.totalRevenue)}</p>
-                    <p className="text-xs" style={{color: '#666'}}>+2.24% <span style={{color: '#999'}}>From last month</span></p>
+                    <p className="text-slate-300 text-sm font-medium mb-2">Lifetime Value</p>
+                    <p className="text-4xl font-bold mb-1">{formatCurrency(stats.totalRevenue)}</p>
+                    <p className="text-xs text-slate-400">+2.24% <span className="text-slate-500">From last month</span></p>
                   </div>
-                  <div className="p-3 rounded-lg" style={{backgroundColor: '#F4EBD3'}}>
-                    <TrendingUp className="h-5 w-5" style={{color: '#1B3C53'}} />
+                  <div className="p-3 rounded-lg" style={{backgroundColor: '#456882'}}>
+                    <TrendingUp className="h-5 w-5" />
                   </div>
                 </div>
               </CardContent>
@@ -352,14 +281,5 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed bottom-8 right-8 md:hidden z-40 text-white p-3 rounded-full"
-        style={{backgroundColor: '#1B3C53'}}
-      >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </button>
-    </div>
   )
 }

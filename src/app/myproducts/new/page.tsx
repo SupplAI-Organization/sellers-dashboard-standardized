@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { getSupabaseClient } from "@/lib/supabaseClient"
+import { AppSidebar } from "@/components/AppSidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -89,7 +90,7 @@ export default function NewProductPage() {
       }
 
       // Upload images to storage
-      let imageUrls: string[] = []
+      const imageUrls: string[] = []
       for (const file of imageFiles) {
         const fileExt = file.name.split(".").pop()
         const fileName = `${user.id}/${Date.now()}-${Math.random()}.${fileExt}`
@@ -144,8 +145,8 @@ export default function NewProductPage() {
       }
 
       router.push("/myproducts")
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred")
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
       setLoading(false)
     }
   }
@@ -153,15 +154,16 @@ export default function NewProductPage() {
   const isFormValid = form.name && form.category && form.price_per_unit && form.available_quantity
 
   return (
-    <div className="min-h-screen py-8 px-4" style={{backgroundColor: '#F4EBD3'}}>
-      <div className="max-w-4xl mx-auto">
+    <div className="flex h-screen bg-white overflow-hidden">
+      <AppSidebar />
+      <div className="flex-1 overflow-auto py-8 px-4 md:px-8" style={{backgroundColor: '#F9E7B2'}}>
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 max-w-4xl mx-auto">
           <Button 
             variant="ghost" 
             size="sm" 
             asChild
-            className="mb-4"
+            className="mb-4 -ml-3"
             style={{color: '#1B3C53'}}
           >
             <Link href="/myproducts">
@@ -179,19 +181,19 @@ export default function NewProductPage() {
 
         {error && (
           <Alert 
-            className="mb-6"
-            style={{backgroundColor: '#FFE6E6', borderColor: '#D2C1B6', color: '#1B3C53'}}
+            className="mb-6 rounded-lg"
+            style={{backgroundColor: '#FEE2E2', borderColor: '#1B3C53', borderWidth: '2px', color: '#1B3C53'}}
           >
             <AlertCircle className="h-5 w-5" />
-            <AlertDescription className="ml-2 text-sm">{error}</AlertDescription>
+            <AlertDescription className="ml-2 text-sm font-medium">{error}</AlertDescription>
           </Alert>
         )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
         {/* Basic Information Card */}
-        <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-lg">
-          <CardHeader className="pb-4 border-b" style={{borderBottomColor: '#D2C1B6'}}>
-            <CardTitle className="text-xl" style={{color: '#1B3C53'}}>📋 Basic Information</CardTitle>
+        <Card style={{backgroundColor: '#ffffff', borderColor: '#1B3C53', borderWidth: '2px'}} className="shadow-lg">
+          <CardHeader className="pb-4 border-b" style={{backgroundColor: '#F9E7B2', borderBottomColor: '#1B3C53', borderBottomWidth: '2px'}}>
+            <CardTitle className="text-xl" style={{color: '#1B3C53'}}> Basic Information</CardTitle>
             <CardDescription style={{color: '#1B3C53'}}>Essential product details</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 pt-6">
@@ -272,9 +274,9 @@ export default function NewProductPage() {
         </Card>
 
         {/* Pricing & Stock Card */}
-        <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-lg">
-          <CardHeader className="pb-4 border-b" style={{borderBottomColor: '#D2C1B6'}}>
-            <CardTitle className="text-xl" style={{color: '#1B3C53'}}>💰 Pricing & Stock</CardTitle>
+        <Card style={{backgroundColor: '#ffffff', borderColor: '#1B3C53', borderWidth: '2px'}} className="shadow-lg">
+          <CardHeader className="pb-4 border-b" style={{backgroundColor: '#F9E7B2', borderBottomColor: '#1B3C53', borderBottomWidth: '2px'}}>
+            <CardTitle className="text-xl" style={{color: '#1B3C53'}}> Pricing & Stock</CardTitle>
             <CardDescription style={{color: '#1B3C53'}}>Set your prices and available quantities</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 pt-6">
@@ -354,9 +356,9 @@ export default function NewProductPage() {
         </Card>
 
         {/* Quality & Origin Card */}
-        <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-lg">
-          <CardHeader className="pb-4 border-b" style={{borderBottomColor: '#D2C1B6'}}>
-            <CardTitle className="text-xl" style={{color: '#1B3C53'}}>✨ Quality & Origin</CardTitle>
+        <Card style={{backgroundColor: '#ffffff', borderColor: '#1B3C53', borderWidth: '2px'}} className="shadow-lg">
+          <CardHeader className="pb-4 border-b" style={{backgroundColor: '#F9E7B2', borderBottomColor: '#1B3C53', borderBottomWidth: '2px'}}>
+            <CardTitle className="text-xl" style={{color: '#1B3C53'}}> Quality & Origin</CardTitle>
             <CardDescription style={{color: '#1B3C53'}}>Product quality and origin information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 pt-6">
@@ -393,10 +395,10 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            <Separator style={{borderTopColor: '#D2C1B6'}} />
+            <Separator style={{borderTopColor: '#E5E5E5'}} />
 
             <div className="space-y-4">
-              <h4 className="font-semibold text-base" style={{color: '#1B3C53'}}>📍 Origin Information</h4>
+              <h4 className="font-semibold text-base" style={{color: '#1B3C53'}}> Origin Information</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
                   <Label htmlFor="origin_country" className="text-sm font-semibold block mb-2" style={{color: '#1B3C53'}}>
@@ -451,9 +453,9 @@ export default function NewProductPage() {
         </Card>
 
         {/* Product Images Card */}
-        <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-lg">
-          <CardHeader className="pb-4 border-b" style={{borderBottomColor: '#D2C1B6'}}>
-            <CardTitle className="text-xl" style={{color: '#1B3C53'}}>📸 Product Images</CardTitle>
+        <Card style={{backgroundColor: '#ffffff', borderColor: '#1B3C53', borderWidth: '2px'}} className="shadow-lg">
+          <CardHeader className="pb-4 border-b" style={{backgroundColor: '#F9E7B2', borderBottomColor: '#1B3C53', borderBottomWidth: '2px'}}>
+            <CardTitle className="text-xl" style={{color: '#1B3C53'}}> Product Images</CardTitle>
             <CardDescription style={{color: '#1B3C53'}}>Upload up to 5 product images (optional)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 pt-6">
@@ -524,13 +526,13 @@ export default function NewProductPage() {
         </Card>
 
         {/* Form Actions */}
-        <div className="flex gap-4 justify-end pt-2">
+        <div className="flex gap-4 justify-end pt-2 pb-8">
           <Button 
             variant="outline" 
             asChild 
             disabled={loading}
-            className="px-6"
-            style={{borderColor: '#D2C1B6', color: '#1B3C53'}}
+            className="px-6 font-semibold"
+            style={{borderColor: '#1B3C53', color: '#1B3C53'}}
           >
             <Link href="/myproducts">Cancel</Link>
           </Button>
@@ -547,13 +549,13 @@ export default function NewProductPage() {
               </>
             ) : (
               <>
-                ✓ Create Product
+                 Create Product
               </>
             )}
           </Button>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
-  </div>
   )
 }

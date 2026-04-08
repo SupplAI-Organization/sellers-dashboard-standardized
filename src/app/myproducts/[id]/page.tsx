@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabaseServer"
+import { AppSidebar } from "@/components/AppSidebar"
 import {
   Card,
   CardContent,
@@ -97,17 +98,32 @@ export default async function ProductDetailPage({
     : []
 
   return (
-    <div className="space-y-8 py-8">
+    <div className="flex h-screen bg-white overflow-hidden">
+      <AppSidebar />
+      <div className="flex-1 overflow-auto" style={{backgroundColor: '#F9E7B2'}}>
+        <div style={{backgroundColor: '#ffffff'}}>
+          {/* Header bar */}
+          <div style={{backgroundColor: '#F9E7B2', borderBottomColor: '#D2C1B6'}} className="border-b shadow-sm">
+            <div className="px-4 md:px-8 py-4 max-w-7xl mx-auto">
+              <div className="flex items-center gap-3 text-sm">
+                <Link href="/myproducts" className="hover:underline font-medium" style={{color: '#1B3C53'}}>My Products</Link>
+                <span style={{color: '#1B3C53'}}>/</span>
+                <span className="font-semibold" style={{color: '#1B3C53'}}>{p.name}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-8 py-8 px-4 md:px-8 max-w-7xl mx-auto">
       {/* Top bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b" style={{borderBottomColor: '#D2C1B6'}}>
         <div className="space-y-2">
-          <Button variant="ghost" size="sm" asChild className="h-8 px-2" style={{color: '#1B3C53'}}>
+          <Button variant="ghost" size="sm" asChild className="h-8 px-2 -ml-2" style={{color: '#1B3C53'}}>
             <Link href="/myproducts">← Back to Products</Link>
           </Button>
           <h1 className="text-4xl font-bold tracking-tight" style={{color: '#1B3C53'}}>{p.name}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" style={{borderColor: '#D2C1B6', color: '#1B3C53'}}>
+          <Button variant="outline" size="sm" className="font-semibold" style={{borderColor: '#D2C1B6', color: '#1B3C53'}}>
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
@@ -116,11 +132,11 @@ export default async function ProductDetailPage({
       </div>
 
       {/* Hero section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Images */}
-        <div className="md:col-span-1 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Images - Left */}
+        <div className="lg:col-span-1 space-y-4">
           {primaryImage ? (
-            <div className="relative w-full aspect-square rounded-xl overflow-hidden ring-1 shadow-md" style={{backgroundColor: '#F5F5F5', borderColor: '#D2C1B6'}}>
+            <div className="relative w-full aspect-square rounded-lg overflow-hidden ring-2 shadow-lg" style={{backgroundColor: '#F5F5F5', borderColor: '#F9E7B2'}}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={primaryImage}
@@ -129,8 +145,8 @@ export default async function ProductDetailPage({
               />
             </div>
           ) : (
-            <div className="w-full aspect-square rounded-xl flex items-center justify-center ring-1 shadow-md" style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}}>
-              <span style={{color: '#1B3C53'}} className="text-sm">No image</span>
+            <div className="w-full aspect-square rounded-lg flex items-center justify-center ring-2 shadow-lg" style={{backgroundColor: '#F9E7B2', borderColor: '#D2C1B6'}}>
+              <span style={{color: '#1B3C53'}} className="text-sm font-semibold">No image</span>
             </div>
           )}
 
@@ -144,8 +160,8 @@ export default async function ProductDetailPage({
                   src={url}
                   alt={`${p.name} ${i + 1}`}
                   loading="lazy"
-                  className="h-24 w-24 rounded-lg object-cover shrink-0 ring-1 bg-slate-100 opacity-75 hover:opacity-100 transition-opacity cursor-pointer"
-                  style={{borderColor: '#D2C1B6', backgroundColor: '#F5F5F5'}}
+                  className="h-24 w-24 rounded-lg object-cover shrink-0 ring-2 bg-slate-100 opacity-75 hover:opacity-100 transition-opacity cursor-pointer"
+                  style={{borderColor: '#F9E7B2', backgroundColor: '#F5F5F5'}}
                 />
               ))}
             </div>
@@ -153,7 +169,7 @@ export default async function ProductDetailPage({
         </div>
 
         {/* Product info */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           <div className="space-y-3">
             <p className="text-sm uppercase tracking-wider font-semibold" style={{color: '#1B3C53'}}>
               {p.category}
@@ -171,11 +187,11 @@ export default async function ProductDetailPage({
             </div>
           </div>
 
-          <div className="space-y-1">
-            <p className="text-sm font-medium" style={{color: '#1B3C53'}}>Price per unit</p>
+          <div className="space-y-1 p-5 rounded-lg" style={{backgroundColor: '#F9E7B2', borderColor: '#D2C1B6', borderWidth: '2px'}}>
+            <p className="text-sm font-semibold" style={{color: '#1B3C53'}}>Price per unit</p>
             <div className="text-5xl font-bold" style={{color: '#1B3C53'}}>
               ₹{Number(p.price_per_unit).toLocaleString("en-IN")}
-              <span className="text-xl font-normal ml-3" style={{color: '#1B3C53'}}>
+              <span className="text-xl font-semibold ml-3" style={{color: '#1B3C53'}}>
                 / {p.unit_type}
               </span>
             </div>
@@ -190,9 +206,9 @@ export default async function ProductDetailPage({
 
           {/* Quick stats grid */}
           <div className="grid grid-cols-2 gap-4 pt-4">
-            <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-sm">
+            <Card style={{backgroundColor: '#F9E7B2', borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-sm">
               <CardContent className="pt-4">
-                <p className="text-xs font-semibold" style={{color: '#1B3C53'}}>AVAILABLE STOCK</p>
+                <p className="text-xs font-bold" style={{color: '#1B3C53'}}>AVAILABLE STOCK</p>
                 <p className="text-3xl font-bold mt-2" style={{color: '#1B3C53'}}>
                   {p.available_quantity}
                 </p>
@@ -201,9 +217,9 @@ export default async function ProductDetailPage({
             </Card>
 
             {p.min_order_quantity != null && (
-              <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-sm">
+              <Card style={{backgroundColor: '#F9E7B2', borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-sm">
                 <CardContent className="pt-4">
-                  <p className="text-xs font-semibold" style={{color: '#1B3C53'}}>MINIMUM ORDER</p>
+                  <p className="text-xs font-bold" style={{color: '#1B3C53'}}>MINIMUM ORDER</p>
                   <p className="text-3xl font-bold mt-2" style={{color: '#1B3C53'}}>
                     {p.min_order_quantity}
                   </p>
@@ -213,9 +229,9 @@ export default async function ProductDetailPage({
             )}
 
             {p.lead_time_days != null && (
-              <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-sm">
+              <Card style={{backgroundColor: '#F9E7B2', borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-sm">
                 <CardContent className="pt-4">
-                  <p className="text-xs font-semibold" style={{color: '#1B3C53'}}>LEAD TIME</p>
+                  <p className="text-xs font-bold" style={{color: '#1B3C53'}}>LEAD TIME</p>
                   <p className="text-3xl font-bold mt-2" style={{color: '#1B3C53'}}>{p.lead_time_days}</p>
                   <p className="text-xs mt-1" style={{color: '#1B3C53'}}>days</p>
                 </CardContent>
@@ -223,9 +239,9 @@ export default async function ProductDetailPage({
             )}
 
             {origin && (
-              <Card style={{backgroundColor: '#F4EBD3', borderColor: '#D2C1B6'}} className="shadow-sm">
+              <Card style={{backgroundColor: '#F9E7B2', borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-sm">
                 <CardContent className="pt-4">
-                  <p className="text-xs font-semibold" style={{color: '#1B3C53'}}>ORIGIN</p>
+                  <p className="text-xs font-bold" style={{color: '#1B3C53'}}>ORIGIN</p>
                   <p className="text-sm font-bold mt-2 truncate" style={{color: '#1B3C53'}}>{origin}</p>
                 </CardContent>
               </Card>
@@ -235,11 +251,11 @@ export default async function ProductDetailPage({
       </div>
 
       {/* Detail cards grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {/* Pricing & Stock */}
-        <Card style={{borderColor: '#D2C1B6'}}>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Pricing & Stock</CardTitle>
+        <Card style={{borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-md">
+          <CardHeader style={{backgroundColor: '#F9E7B2', borderBottomColor: '#D2C1B6'}} className="pb-3 border-b">
+            <CardTitle className="text-base font-bold" style={{color: '#1B3C53'}}>Pricing & Stock</CardTitle>
           </CardHeader>
           <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
             <DetailRow
@@ -272,9 +288,9 @@ export default async function ProductDetailPage({
         </Card>
 
         {/* Origin & Logistics */}
-        <Card style={{borderColor: '#D2C1B6'}}>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Origin & Logistics</CardTitle>
+        <Card style={{borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-md">
+          <CardHeader style={{backgroundColor: '#F9E7B2', borderBottomColor: '#D2C1B6'}} className="pb-3 border-b">
+            <CardTitle className="text-base font-bold" style={{color: '#1B3C53'}}>Origin & Logistics</CardTitle>
           </CardHeader>
           <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
             {origin && <DetailRow label="Origin" value={origin} />}
@@ -286,9 +302,9 @@ export default async function ProductDetailPage({
         </Card>
 
         {/* Quality & Compliance */}
-        <Card style={{borderColor: '#D2C1B6'}}>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Quality & Compliance</CardTitle>
+        <Card style={{borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-md">
+          <CardHeader style={{backgroundColor: '#F9E7B2', borderBottomColor: '#D2C1B6'}} className="pb-3 border-b">
+            <CardTitle className="text-base font-bold" style={{color: '#1B3C53'}}>Quality & Compliance</CardTitle>
           </CardHeader>
           <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
             {p.quality_grade && <DetailRow label="Quality grade" value={p.quality_grade} />}
@@ -301,9 +317,9 @@ export default async function ProductDetailPage({
         </Card>
 
         {/* Listing info */}
-        <Card style={{borderColor: '#D2C1B6'}}>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Listing Info</CardTitle>
+        <Card style={{borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-md">
+          <CardHeader style={{backgroundColor: '#F9E7B2', borderBottomColor: '#D2C1B6'}} className="pb-3 border-b">
+            <CardTitle className="text-base font-bold" style={{color: '#1B3C53'}}>Listing Info</CardTitle>
           </CardHeader>
           <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
             {p.listed_at && (
@@ -342,9 +358,9 @@ export default async function ProductDetailPage({
 
       {/* Dynamic attributes */}
       {dynamicEntries.length > 0 && (
-        <Card style={{borderColor: '#D2C1B6'}}>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold" style={{color: '#1B3C53'}}>Additional Attributes</CardTitle>
+        <Card style={{borderColor: '#D2C1B6', borderWidth: '2px'}} className="shadow-md">
+          <CardHeader style={{backgroundColor: '#F9E7B2', borderBottomColor: '#D2C1B6'}} className="pb-3 border-b">
+            <CardTitle className="text-base font-bold" style={{color: '#1B3C53'}}>Additional Attributes</CardTitle>
           </CardHeader>
           <CardContent className="divide-y pt-0" style={{borderColor: '#D2C1B6'}}>
             {dynamicEntries.map(([key, val]) => (
@@ -357,6 +373,9 @@ export default async function ProductDetailPage({
           </CardContent>
         </Card>
       )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

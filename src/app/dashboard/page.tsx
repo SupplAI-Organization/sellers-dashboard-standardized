@@ -1,39 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabaseServer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { Package, ShoppingCart, TrendingUp, Grid3x3, Search, Settings, LogOut, Menu } from "lucide-react"
-import Link from "next/link"
+import { AppSidebar } from "@/components/AppSidebar"
 import DashboardClient from "./dashboard-client"
-
-interface Order {
-  id: string
-  product_id: string
-  supplier_id: string
-  buyer_id: string
-  quantity: number
-  total_price: number
-  order_date: string
-  payment_method: string
-  status: string
-  products?: {
-    name: string
-  }
-}
-
-interface Product {
-  id: string
-  name: string
-  price_per_unit: number
-  available_quantity: number
-  supplier_id: string
-}
-
-interface SupplierProfile {
-  business_name?: string
-  contact_person?: string
-  email?: string
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -104,23 +72,25 @@ export default async function DashboardPage() {
     }
   })
 
-  const displayName = userProfile?.full_name || supplierProfile?.contact_person || "Guest"
+  const displayName = userProfile?.full_name || supplierProfile?.contact_person || "Seller"
   const displayEmail = userProfile?.email || user.email || ""
 
   return (
-    <DashboardClient 
-      displayName={displayName}
-      displayEmail={displayEmail}
-      userId={user.id}
-      chartData={chartData}
-      orders={orders || []}
-      products={products || []}
-      stats={{
-        avgOrderValue: parseFloat(avgOrderValue),
-        totalOrders,
-        totalRevenue,
-        totalProducts,
-      }}
-    />
+    <div className="flex h-screen bg-white overflow-hidden">
+      <AppSidebar />
+      <DashboardClient 
+        displayName={displayName}
+        displayEmail={displayEmail}
+        chartData={chartData}
+        orders={orders || []}
+        products={products || []}
+        stats={{
+          avgOrderValue: parseFloat(avgOrderValue),
+          totalOrders,
+          totalRevenue,
+          totalProducts,
+        }}
+      />
+    </div>
   )
 }

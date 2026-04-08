@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabaseServer"
+import { AppSidebar } from "@/components/AppSidebar"
 import {
   Card,
   CardContent,
@@ -51,32 +52,34 @@ export default async function MyProductsPage() {
   }
 
   return (
-    <div className="space-y-6 py-8 px-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight" style={{color: '#1B3C53'}}>My Products</h1>
-          <p className="text-sm" style={{color: '#666'}}>
-            Manage and track all your product listings
-          </p>
+    <div className="flex h-screen bg-white overflow-hidden">
+      <AppSidebar />
+      <div className="flex-1 overflow-auto space-y-6 py-8 px-4 md:px-8" style={{backgroundColor: '#F9E7B2'}}>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight" style={{color: '#1B3C53'}}>My Products</h1>
+            <p className="text-sm" style={{color: '#666'}}>
+              Manage and track all your product listings
+            </p>
+          </div>
+          <Button asChild size="lg" className="text-white font-semibold shadow-md" style={{backgroundColor: '#1B3C53'}}>
+            <Link href="/myproducts/new">
+              <Plus className="h-5 w-5 mr-2" />
+              Add Product
+            </Link>
+          </Button>
         </div>
-        <Button asChild size="lg" className="text-white font-semibold shadow-md" style={{backgroundColor: '#1B3C53'}}>
-          <Link href="/myproducts/new">
-            <Plus className="h-5 w-5 mr-2" />
-            Add Product
-          </Link>
-        </Button>
-      </div>
 
       {/* Stats */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card style={{backgroundColor: '#F4EBD3'}} className="shadow-sm">
+        <Card style={{backgroundColor: '#ffffff'}} className="shadow-sm">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold" style={{color: '#1B3C53'}}>{products?.length ?? 0}</div>
             <p className="text-xs mt-1" style={{color: '#666'}}>Total Products</p>
           </CardContent>
         </Card>
-        <Card style={{backgroundColor: '#F4EBD3'}} className="shadow-sm">
+        <Card style={{backgroundColor: '#ffffff'}} className="shadow-sm">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold" style={{color: '#1B3C53'}}>
               {products?.filter(p => p.is_listed).length ?? 0}
@@ -84,7 +87,7 @@ export default async function MyProductsPage() {
             <p className="text-xs mt-1" style={{color: '#666'}}>Listed</p>
           </CardContent>
         </Card>
-        <Card style={{backgroundColor: '#F4EBD3'}} className="shadow-sm">
+        <Card style={{backgroundColor: '#ffffff'}} className="shadow-sm">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold" style={{color: '#1B3C53'}}>
               {products?.filter(p => p.is_approved).length ?? 0}
@@ -92,7 +95,7 @@ export default async function MyProductsPage() {
             <p className="text-xs mt-1" style={{color: '#666'}}>Approved</p>
           </CardContent>
         </Card>
-        <Card style={{backgroundColor: '#F4EBD3'}} className="shadow-sm">
+        <Card style={{backgroundColor: '#ffffff'}} className="shadow-sm">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold" style={{color: '#1B3C53'}}>
               {products?.filter(p => p.availability_status === "in_stock").length ?? 0}
@@ -103,8 +106,8 @@ export default async function MyProductsPage() {
       </div>
 
       {/* Products Table */}
-      <Card style={{borderColor: '#D2C1B6'}}>
-        <CardHeader style={{backgroundColor: '#F4EBD3', borderBottomColor: '#D2C1B6'}} className="border-b">
+      <Card style={{backgroundColor: '#ffffff', borderColor: '#D2C1B6'}}>
+        <CardHeader style={{backgroundColor: '#F9E7B2', borderBottomColor: '#D2C1B6'}} className="border-b">
           <CardTitle style={{color: '#1B3C53'}}>Product Inventory</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -124,7 +127,7 @@ export default async function MyProductsPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr style={{backgroundColor: '#F4EBD3', borderBottomColor: '#D2C1B6'}} className="border-b">
+                  <tr style={{backgroundColor: '#F9E7B2', borderBottomColor: '#D2C1B6'}} className="border-b">
                     <th className="text-left py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Product Name</th>
                     <th className="text-left py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Category</th>
                     <th className="text-left py-3 px-4 font-semibold text-sm" style={{color: '#1B3C53'}}>Price</th>
@@ -155,12 +158,12 @@ export default async function MyProductsPage() {
                       <td className="py-4 px-4">
                         <div className="space-y-1">
                           {product.is_approved ? (
-                            <Badge style={{backgroundColor: '#F4EBD3', color: '#1B3C53'}} className="text-xs">Approved</Badge>
+                            <Badge style={{backgroundColor: '#F9E7B2', color: '#1B3C53'}} className="text-xs">Approved</Badge>
                           ) : (
                             <Badge variant="outline" className="text-xs">Pending</Badge>
                           )}
                           {product.is_listed ? (
-                            <Badge style={{backgroundColor: '#F4EBD3', color: '#1B3C53'}} className="text-xs">Listed</Badge>
+                            <Badge style={{backgroundColor: '#F9E7B2', color: '#1B3C53'}} className="text-xs">Listed</Badge>
                           ) : (
                             <Badge variant="secondary" className="text-xs">Unlisted</Badge>
                           )}
@@ -187,6 +190,7 @@ export default async function MyProductsPage() {
           )}
         </CardContent>
       </Card>
+    </div>
     </div>
   )
 }

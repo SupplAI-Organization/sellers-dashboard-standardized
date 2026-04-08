@@ -100,8 +100,8 @@ export default function OnboardingPage() {
     form.contact_number.trim()
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#F4EBD3'}}>
-      <Card className="w-full max-w-xl shadow-lg" style={{backgroundColor: '#F4EBD3'}}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{backgroundColor: '#F9E7B2'}}>
+      <Card className="w-full max-w-xl shadow-lg" style={{backgroundColor: '#F9E7B2'}}>
         <CardHeader className="space-y-2 pb-8">
           <div className="space-y-2">
             <CardTitle className="text-3xl font-bold" style={{color: '#1B3C53'}}>Complete Your Profile</CardTitle>
