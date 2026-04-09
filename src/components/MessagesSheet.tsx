@@ -23,7 +23,7 @@ export default function MessagesSheet({
   productId,
   userId,
 }: {
-  productId: string
+  productId?: string | null
   userId: string
 }) {
   const [open, setOpen] = useState(false)
@@ -44,10 +44,13 @@ export default function MessagesSheet({
     setError(null)
 
     // 1. Initial fetch
-    supabase
-      .from("messages")
-      .select("*")
-      .eq("product_id", productId)
+    let query = supabase.from("messages").select("*")
+    
+    if (productId) {
+      query = query.eq("product_id", productId)
+    }
+    
+    query
       .order("created_at", { ascending: true })
       .then(({ data, error: err }: { data: Message[] | null; error: { message: string } | null }) => {
         setLoading(false)
@@ -56,11 +59,14 @@ export default function MessagesSheet({
       })
 
     // 2. Real-time — append inserts as they arrive
+    const channelName = productId ? `messages-product-${productId}` : `messages-all`
+    const filterClause = productId ? `product_id=eq.${productId}` : undefined
+    
     const channel = supabase
-      .channel(`messages-product-${productId}`)
+      .channel(channelName)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `product_id=eq.${productId}` },
+        { event: "INSERT", schema: "public", table: "messages", ...(filterClause && { filter: filterClause }) },
         (payload: { new: Message }) => {
           setAllMessages((prev) => [...prev, payload.new])
         }
@@ -115,6 +121,10 @@ export default function MessagesSheet({
   async function sendMessage() {
     const trimmed = text.trim()
     if (!trimmed || sending || !activeBuyerId) return
+    if (!productId) {
+      setError("No product selected for messaging")
+      return
+    }
     setSending(true)
     setText("")
     const { error: err } = await supabase.from("messages").insert({
