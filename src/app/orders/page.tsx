@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabaseServer"
 import { AppSidebar } from "@/components/AppSidebar"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Eye, Printer, ShoppingCart, Clock, CheckCircle, TrendingUp } from "lucide-react"
+import { Printer, ShoppingCart, Clock, CheckCircle, TrendingUp } from "lucide-react"
+import OrdersClient from "./orders-client"
 
 interface Order {
   id: string
@@ -24,12 +24,6 @@ interface Order {
   }
 }
 
-function statusLabel(status: string): string {
-  return status
-    .split("_")
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ")
-}
 
 export default async function OrdersPage() {
   const supabase = await createClient()
@@ -197,139 +191,8 @@ export default async function OrdersPage() {
           </div>
         </div>
 
-        {/* Orders Table */}
-        <div style={{backgroundColor: '#ffffff', borderColor: '#E5E5E5'}} className="rounded-lg border shadow-sm">
-          {/* Table Header */}
-          <div style={{backgroundColor: '#F9F9F9', borderBottomColor: '#E5E5E5'}} className="px-6 py-4 border-b">
-            <h3 className="font-semibold text-lg" style={{color: '#1B3C53'}}>Order Details</h3>
-          </div>
-
-          {/* Table Content */}
-          <div className="overflow-x-auto">
-            {!enrichedOrders || enrichedOrders.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 px-6">
-                <ShoppingCart className="h-12 w-12 mb-3" style={{color: '#DDD'}} />
-                <h3 className="text-lg font-semibold mb-2" style={{color: '#1B3C53'}}>No orders yet</h3>
-                <p style={{color: '#999'}} className="mb-4">Orders from buyers will appear here</p>
-              </div>
-            ) : (
-              <table className="w-full">
-                <thead>
-                  <tr style={{backgroundColor: '#F9F9F9', borderBottomColor: '#E5E5E5'}} className="border-b">
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>ORDER ID</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>PRODUCT</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>BUYER</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>QUANTITY</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>AMOUNT</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>METHOD</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>STATUS</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>DATE</th>
-                    <th className="text-center py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>ACTION</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {enrichedOrders.map((order) => (
-                    <tr 
-                      key={order.id} 
-                      style={{borderBottomColor: '#E5E5E5'}} 
-                      className="border-b hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="py-4 px-6">
-                        <code className="text-xs font-mono bg-gray-100 px-2 py-1 rounded" style={{color: '#1B3C53'}}>
-                          {order.id.substring(0, 8)}
-                        </code>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="text-sm font-semibold" style={{color: '#1B3C53'}}>
-                          {order.products?.name || "Product"}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div>
-                          <div className="text-sm font-medium" style={{color: '#1B3C53'}}>
-                            {order.buyers?.full_name || "Unknown"}
-                          </div>
-                          <div className="text-xs" style={{color: '#999'}}>
-                            {order.buyers?.email?.substring(0, 20)}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="text-sm font-semibold" style={{color: '#1B3C53'}}>
-                          {order.quantity}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="text-sm font-bold" style={{color: '#1B3C53'}}>
-                          ₹{Number(order.total_price).toLocaleString("en-IN")}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="text-sm" style={{color: '#1B3C53'}}>
-                          {order.payment_method
-                            ? order.payment_method
-                              .split("_")
-                              .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-                              .join(" ")
-                            : "-"}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <Badge 
-                          className="font-semibold text-xs"
-                          style={{
-                            backgroundColor: 
-                              order.status === "completed" || order.status === "delivered" ? "#D1FAE5" :
-                              order.status === "pending" ? "#FEF3C7" :
-                              "#FEE2E2",
-                            color: 
-                              order.status === "completed" || order.status === "delivered" ? "#059669" :
-                              order.status === "pending" ? "#D97706" :
-                              "#DC2626",
-                            border: "none"
-                          }}
-                        >
-                          {statusLabel(order.status)}
-                        </Badge>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="text-sm" style={{color: '#1B3C53'}}>
-                          {new Date(order.order_date).toLocaleDateString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center justify-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="hover:bg-gray-100"
-                          >
-                            <Eye className="h-4 w-4" style={{color: '#1B3C53'}} />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          {/* Table Footer */}
-          {enrichedOrders.length > 0 && (
-            <div style={{backgroundColor: '#F9F9F9', borderTopColor: '#E5E5E5'}} className="px-6 py-3 border-t flex items-center justify-between text-sm">
-              <span style={{color: '#999'}}>Showing {enrichedOrders.length} orders</span>
-              <div className="flex gap-1">
-                <Button variant="outline" size="sm" disabled>Previous</Button>
-                <Button variant="outline" size="sm" disabled>Next</Button>
-              </div>
-            </div>
-            )}
-          </div>
+        {/* Orders List */}
+        <OrdersClient initialOrders={enrichedOrders} userId={user.id} />
         </div>
       </div>
     </div>
