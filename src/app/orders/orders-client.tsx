@@ -32,12 +32,15 @@ export default function OrdersClient({
   const [orders, setOrders] = useState<Order[]>(initialOrders)
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let channel: any = null
+
     // Set up real-time subscription to orders changes
     const subscribeToOrders = async () => {
       const { getSupabaseClient } = await import("@/lib/supabaseClient")
       const supabase = getSupabaseClient()
 
-      const subscription = supabase
+      channel = supabase
         .channel(`orders-${userId}`)
         .on(
           "postgres_changes",
@@ -60,11 +63,13 @@ export default function OrdersClient({
           }
         )
         .subscribe()
-
-      return subscription
     }
 
     subscribeToOrders()
+
+    return () => {
+      channel?.unsubscribe()
+    }
   }, [userId])
 
   return (
