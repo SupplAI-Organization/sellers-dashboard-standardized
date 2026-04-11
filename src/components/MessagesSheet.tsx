@@ -40,9 +40,6 @@ export default function MessagesSheet({
   useEffect(() => {
     if (!open) return
 
-    setLoading(true)
-    setError(null)
-
     // 1. Initial fetch
     let query = supabase.from("messages").select("*")
     
@@ -53,9 +50,9 @@ export default function MessagesSheet({
     query
       .order("created_at", { ascending: true })
       .then(({ data, error: err }: { data: Message[] | null; error: { message: string } | null }) => {
+        setError(err?.message ?? null)
         setLoading(false)
-        if (err) { setError(err.message); return }
-        setAllMessages(data ?? [])
+        if (!err) setAllMessages(data ?? [])
       })
 
     // 2. Real-time — append inserts as they arrive
@@ -86,13 +83,13 @@ export default function MessagesSheet({
       )
     )
 
-    if (buyerIds.length === 0) {
-      setBuyers([])
-      setActiveBuyerId(null)
-      return
-    }
-
     ;(async () => {
+      if (buyerIds.length === 0) {
+        setBuyers([])
+        setActiveBuyerId(null)
+        return
+      }
+
       const params = new URLSearchParams({ ids: buyerIds.join(",") })
       const res = await fetch(`/api/buyers?${params}`)
       if (!res.ok) {

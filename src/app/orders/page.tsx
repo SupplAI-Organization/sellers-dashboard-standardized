@@ -5,9 +5,28 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Eye, Printer, ShoppingCart, Clock, CheckCircle, TrendingUp } from "lucide-react"
 
+interface OrderItem {
+  id: string
+  order_id: string
+  product_id: string
+  quantity: number
+  price_at_purchase: number
+  product_name?: string
+  product_unit_type?: string
+  product_price_per_unit?: number
+}
+
+interface BuyerDetails {
+  id: string
+  contact_person: string | null
+  email: string | null
+  contact_number?: string | null
+  business_address?: string | null
+  business_name?: string | null
+}
+
 interface Order {
   id: string
-  product_id: string
   supplier_id: string
   buyer_id: string
   quantity: number
@@ -15,13 +34,12 @@ interface Order {
   order_date: string
   payment_method: string
   status: string
+  items?: OrderItem[]
+  buyers?: BuyerDetails
   products?: {
     name: string
   }
-  buyers?: {
-    email: string
-    full_name: string
-  }
+  calculatedTotalPrice?: number
 }
 
 function statusLabel(status: string): string {
@@ -42,12 +60,17 @@ export default async function OrdersPage() {
     redirect("/login")
   }
 
-  // Fetch orders for the current supplier (without relationships if they don't exist)
+  console.log("Current user ID:", user.id)
+
+  // Fetch orders for the current supplier
   const { data: orders, error } = await supabase
     .from("orders")
     .select("*")
     .eq("supplier_id", user.id)
     .order("order_date", { ascending: false })
+
+  console.log("Orders query error:", error)
+  console.log("Orders found:", orders?.length)
 
   if (error) {
     return (
@@ -59,29 +82,70 @@ export default async function OrdersPage() {
 
   const ordersData = (orders || []) as Order[]
 
-  // Fetch product names for each order (if orders have product_id)
-  const productIds = [...new Set(ordersData.map(o => o.product_id).filter(Boolean))]
+  // Fetch order items for all orders
+  const orderIds = ordersData.map(o => o.id).filter(Boolean)
+  const { data: orderItems } = await supabase
+    .from("order_items")
+    .select("*")
+    .in("order_id", orderIds.length > 0 ? orderIds : [""])
+
+  // Fetch product info for all order items (with more details)
+  const productIds = [...new Set((orderItems || []).map(oi => oi.product_id).filter(Boolean))]
   const { data: productsMap } = await supabase
     .from("products")
-    .select("id, name")
+    .select("id, name, unit_type, price_per_unit, available_quantity")
     .in("id", productIds.length > 0 ? productIds : [""])
 
-  // Fetch buyer info for each order (if orders have buyer_id)
+  // Fetch buyer info for each order
   const buyerIds = [...new Set(ordersData.map(o => o.buyer_id).filter(Boolean))]
-  const { data: buyersMap } = await supabase
-    .from("profiles")
-    .select("id, full_name, email")
+  
+  // Buyers are stored in the users table (referenced by buyer_id)
+  const { data: buyersFromUsers } = await supabase
+    .from("users")
+    .select("*")
     .in("id", buyerIds.length > 0 ? buyerIds : [""])
 
-  // Map products and buyers to their respective orders
+  // Create index maps for quick lookup
   const productsIndex = new Map((productsMap || []).map(p => [p.id, p]))
-  const buyersIndex = new Map((buyersMap || []).map(b => [b.id, b]))
+  const buyersIndex = new Map<string, BuyerDetails>()
+  
+  // Use users table data for buyers
+  ;(buyersFromUsers || []).forEach(b => {
+    buyersIndex.set(b.id, b as BuyerDetails)
+  })
+  const itemsIndex = new Map<string, OrderItem[]>()
+  
+  // Group order items by order_id and enrich with product names and details
+  ;(orderItems || []).forEach(item => {
+    const product = productsIndex.get(item.product_id)
+    const enrichedItem = {
+      ...item,
+      product_name: product?.name || "Product",
+      product_unit_type: product?.unit_type || "unit",
+      product_price_per_unit: product?.price_per_unit
+    }
+    if (!itemsIndex.has(item.order_id)) {
+      itemsIndex.set(item.order_id, [])
+    }
+    itemsIndex.get(item.order_id)?.push(enrichedItem)
+  })
 
-  const enrichedOrders = ordersData.map(order => ({
-    ...order,
-    products: productsIndex.get(order.product_id) || { name: "Product" },
-    buyers: buyersIndex.get(order.buyer_id),
-  })) as Order[]
+  // Enrich orders with items and buyer info
+  const enrichedOrders = ordersData.map(order => {
+    const items = itemsIndex.get(order.id) || []
+    // Calculate total price based on current product prices
+    const calculatedTotalPrice = items.reduce((sum, item) => {
+      const unitPrice = item.product_price_per_unit || item.price_at_purchase || 0
+      return sum + (unitPrice * (item.quantity || 0))
+    }, 0)
+    
+    return {
+      ...order,
+      items,
+      buyers: buyersIndex.get(order.buyer_id),
+      calculatedTotalPrice
+    }
+  }) as Order[]
 
   // Calculate stats
   const totalOrders = enrichedOrders.length
@@ -218,10 +282,15 @@ export default async function OrdersPage() {
                   <tr style={{backgroundColor: '#F9F9F9', borderBottomColor: '#E5E5E5'}} className="border-b">
                     <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>ORDER ID</th>
                     <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>PRODUCT</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>BUYER</th>
                     <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>QUANTITY</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>AMOUNT</th>
-                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>METHOD</th>
+                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>UNIT</th>
+                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>PRICE/UNIT</th>
+                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>BUYER NAME</th>
+                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>BUYER EMAIL</th>
+                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>BUYER PHONE</th>
+                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>ADDRESS</th>
+                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>TOTAL AMOUNT</th>
+                    <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>PAYMENT METHOD</th>
                     <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>STATUS</th>
                     <th className="text-left py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>DATE</th>
                     <th className="text-center py-3 px-6 font-semibold text-xs" style={{color: '#999'}}>ACTION</th>
@@ -241,27 +310,55 @@ export default async function OrdersPage() {
                       </td>
                       <td className="py-4 px-6">
                         <div className="text-sm font-semibold" style={{color: '#1B3C53'}}>
-                          {order.products?.name || "Product"}
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <div>
-                          <div className="text-sm font-medium" style={{color: '#1B3C53'}}>
-                            {order.buyers?.full_name || "Unknown"}
-                          </div>
-                          <div className="text-xs" style={{color: '#999'}}>
-                            {order.buyers?.email?.substring(0, 20)}
-                          </div>
+                          {order.items && order.items.length > 0
+                            ? order.items.map(item => item.product_name).join(", ")
+                            : "Product"}
                         </div>
                       </td>
                       <td className="py-4 px-6">
                         <div className="text-sm font-semibold" style={{color: '#1B3C53'}}>
-                          {order.quantity}
+                          {order.items && order.items.length > 0
+                            ? order.items.reduce((sum, item) => sum + (item.quantity || 0), 0)
+                            : 0}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-sm" style={{color: '#1B3C53'}}>
+                          {order.items && order.items.length > 0
+                            ? order.items.map(item => item.product_unit_type || "unit").join(", ")
+                            : "-"}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-sm font-semibold" style={{color: '#1B3C53'}}>
+                          {order.items && order.items.length > 0
+                            ? "₹" + order.items.map(item => Number(item.product_price_per_unit || item.price_at_purchase)).join(", ")
+                            : "-"}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-sm font-medium" style={{color: '#1B3C53'}}>
+                          {order.buyers?.contact_person || "Unknown"}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-xs" style={{color: '#1B3C53'}}>
+                          {order.buyers?.email || "-"}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-xs" style={{color: '#1B3C53'}}>
+                          {order.buyers?.contact_number || "-"}
+                        </div>
+                      </td>
+                      <td className="py-4 px-6">
+                        <div className="text-xs" style={{color: '#1B3C53'}}>
+                          {order.buyers?.business_address ? order.buyers.business_address.substring(0, 30) : "-"}
                         </div>
                       </td>
                       <td className="py-4 px-6">
                         <div className="text-sm font-bold" style={{color: '#1B3C53'}}>
-                          ₹{Number(order.total_price).toLocaleString("en-IN")}
+                          ₹{Number(order.calculatedTotalPrice || order.total_price).toLocaleString("en-IN")}
                         </div>
                       </td>
                       <td className="py-4 px-6">
