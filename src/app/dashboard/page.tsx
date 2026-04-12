@@ -14,22 +14,21 @@ export default async function DashboardPage() {
     redirect("/login")
   }
 
-  // Fetch supplier profile
-  const { data: supplierProfile } = await supabase
-    .from("supplier_profiles")
-    .select("*")
-    .eq("supplier_id", user.id)
-    .single()
-
   // Fetch recent orders
   const { data: ordersData } = await supabase
     .from("orders")
-    .select("*, products(name)")
+    .select("*")
     .eq("supplier_id", user.id)
     .order("order_date", { ascending: false })
-    .limit(5)
 
   const orders = ordersData || []
+
+  // Fetch order items for all orders to calculate top-selling products
+  const orderIds = orders.map(o => o.id).filter(Boolean)
+  const { data: orderItems } = await supabase
+    .from("order_items")
+    .select("*")
+    .in("order_id", orderIds.length > 0 ? orderIds : [""])
 
   // Fetch supplier products
   const { data: productsData } = await supabase
@@ -37,16 +36,23 @@ export default async function DashboardPage() {
     .select("*")
     .eq("supplier_id", user.id)
     .order("listed_at", { ascending: false })
-    .limit(5)
 
   const products = productsData || []
 
-  // Fetch profile for display name
-  const { data: userProfile } = await supabase
-    .from("profiles")
-    .select("full_name, email")
+  // Fetch profile for display name - try from users table first
+  const { data: userDetails } = await supabase
+    .from("users")
+    .select("contact_person, business_name")
     .eq("id", user.id)
-    .single()
+
+  // Fallback to supplier profile if users table data not available
+  const { data: supplierProfiles } = await supabase
+    .from("supplier_profiles")
+    .select("*")
+    .eq("supplier_id", user.id)
+
+  const supplierProfile = supplierProfiles?.[0] || null
+  const userDetail = userDetails?.[0] || null
 
   // Calculate stats
   const totalOrders = orders?.length || 0
@@ -72,8 +78,25 @@ export default async function DashboardPage() {
     }
   })
 
-  const displayName = userProfile?.full_name || supplierProfile?.contact_person || "Seller"
-  const displayEmail = userProfile?.email || user.email || ""
+  const displayName = userDetail?.contact_person || supplierProfile?.contact_person || "Seller"
+  const displayEmail = user.email || ""
+
+  // Calculate top-selling products from order items
+  const productSales = new Map<string, { quantity: number; revenue: number; productData?: typeof products[0] }>()
+  
+  ;(orderItems || []).forEach(item => {
+    const current = productSales.get(item.product_id) || { quantity: 0, revenue: 0 }
+    productSales.set(item.product_id, {
+      quantity: current.quantity + (item.quantity || 0),
+      revenue: current.revenue + (item.price_at_purchase * (item.quantity || 0)),
+      productData: products.find(p => p.id === item.product_id),
+    })
+  })
+
+  const topSellingProducts = Array.from(productSales.values())
+    .filter(p => p.productData)
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 3)
 
   return (
     <div className="flex h-screen bg-white overflow-hidden">
@@ -84,6 +107,7 @@ export default async function DashboardPage() {
         chartData={chartData}
         orders={orders || []}
         products={products || []}
+        topSellingProducts={topSellingProducts}
         stats={{
           avgOrderValue: parseFloat(avgOrderValue),
           totalOrders,

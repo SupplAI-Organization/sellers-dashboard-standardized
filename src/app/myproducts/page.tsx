@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation"
+﻿import { redirect } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabaseServer"
 import { AppSidebar } from "@/components/AppSidebar"
@@ -137,7 +137,7 @@ export default async function MyProductsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(products as Product[]).map((product, idx) => (
+                  {(products as Product[]).map((product) => (
                     <tr 
                       key={product.id} 
                       style={{borderBottomColor: '#D2C1B6'}} 

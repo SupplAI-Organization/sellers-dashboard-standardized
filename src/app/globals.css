@@ -81,6 +81,14 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Dashboard Custom Colors */
+  --dashboard-bg: #F9E7B2;
+  --dashboard-primary: #1B3C53;
+  --dashboard-secondary: #456882;
+  --dashboard-border: #D2C1B6;
+  --dashboard-text-muted: #666;
+  --dashboard-success: #28a745;
+  --dashboard-text-light: #999;
 }
 
 .dark {
