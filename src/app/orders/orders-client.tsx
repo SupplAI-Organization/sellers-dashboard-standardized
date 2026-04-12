@@ -69,27 +69,18 @@ export default function OrdersClient({
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const channel = (supabase as any)
-          .channel(`orders-${userId}`)
+          .channel(`order-items-${userId}`)
           .on(
             "postgres_changes",
             {
               event: "*",
               schema: "public",
-              table: "orders",
-              filter: `supplier_id=eq.${userId}`,
+              table: "order_items",
             },
-            (payload: { eventType: string; new?: Order; old?: Record<string, unknown> }) => {
+            () => {
               if (!subscribed) return
-
-              if (payload.eventType === "INSERT" && payload.new) {
-                setOrders((prev) => [payload.new as Order, ...prev])
-              } else if (payload.eventType === "UPDATE" && payload.new) {
-                setOrders((prev) =>
-                  prev.map((o) => (o.id === (payload.new as Order).id ? (payload.new as Order) : o))
-                )
-              } else if (payload.eventType === "DELETE" && payload.old) {
-                setOrders((prev) => prev.filter((o) => o.id !== (payload.old as Record<string, unknown>).id))
-              }
+              // Reload the page to re-fetch enriched data from server
+              window.location.reload()
             }
           )
           .subscribe()

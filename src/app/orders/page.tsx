@@ -56,43 +56,62 @@ export default async function OrdersPage() {
 
   console.log("Current user ID:", user.id)
 
-  // Fetch orders for the current supplier
-  const { data: orders, error } = await supabase
-    .from("orders")
-    .select("*")
+  // Fetch products belonging to the current supplier
+  const { data: supplierProducts, error: productsError } = await supabase
+    .from("products")
+    .select("id, name, unit_type, price_per_unit, available_quantity")
     .eq("supplier_id", user.id)
-    .order("order_date", { ascending: false })
 
-  console.log("Orders query error:", error)
-  console.log("Orders found:", orders?.length)
-
-  if (error) {
+  if (productsError) {
     return (
       <div className="p-8 text-destructive">
-        Failed to load orders: {error.message}
+        Failed to load products: {productsError.message}
+      </div>
+    )
+  }
+
+  const productIds = (supplierProducts || []).map(p => p.id).filter(Boolean)
+
+  // Fetch order_items where product_id belongs to this supplier's products
+  const { data: orderItems, error: itemsError } = await supabase
+    .from("order_items")
+    .select("*")
+    .in("product_id", productIds.length > 0 ? productIds : [""])
+
+  if (itemsError) {
+    return (
+      <div className="p-8 text-destructive">
+        Failed to load order items: {itemsError.message}
+      </div>
+    )
+  }
+
+  // Get unique order IDs from the matched order items
+  const orderIds = [...new Set((orderItems || []).map(oi => oi.order_id).filter(Boolean))]
+
+  // Fetch the actual orders for those order IDs
+  const { data: orders, error: ordersError } = await supabase
+    .from("orders")
+    .select("*")
+    .in("id", orderIds.length > 0 ? orderIds : [""])
+    .order("order_date", { ascending: false })
+
+  console.log("Orders query error:", ordersError)
+  console.log("Orders found:", orders?.length)
+
+  if (ordersError) {
+    return (
+      <div className="p-8 text-destructive">
+        Failed to load orders: {ordersError.message}
       </div>
     )
   }
 
   const ordersData = (orders || []) as Order[]
 
-  // Fetch order items for all orders
-  const orderIds = ordersData.map(o => o.id).filter(Boolean)
-  const { data: orderItems } = await supabase
-    .from("order_items")
-    .select("*")
-    .in("order_id", orderIds.length > 0 ? orderIds : [""])
-
-  // Fetch product info for all order items (with more details)
-  const productIds = [...new Set((orderItems || []).map(oi => oi.product_id).filter(Boolean))]
-  const { data: productsMap } = await supabase
-    .from("products")
-    .select("id, name, unit_type, price_per_unit, available_quantity")
-    .in("id", productIds.length > 0 ? productIds : [""])
-
   // Fetch buyer info for each order
   const buyerIds = [...new Set(ordersData.map(o => o.buyer_id).filter(Boolean))]
-  
+
   // Buyers are stored in the users table (referenced by buyer_id)
   const { data: buyersFromUsers } = await supabase
     .from("users")
@@ -100,15 +119,15 @@ export default async function OrdersPage() {
     .in("id", buyerIds.length > 0 ? buyerIds : [""])
 
   // Create index maps for quick lookup
-  const productsIndex = new Map((productsMap || []).map(p => [p.id, p]))
+  const productsIndex = new Map((supplierProducts || []).map(p => [p.id, p]))
   const buyersIndex = new Map<string, BuyerDetails>()
-  
+
   // Use users table data for buyers
   ;(buyersFromUsers || []).forEach(b => {
     buyersIndex.set(b.id, b as BuyerDetails)
   })
   const itemsIndex = new Map<string, OrderItem[]>()
-  
+
   // Group order items by order_id and enrich with product names and details
   ;(orderItems || []).forEach(item => {
     const product = productsIndex.get(item.product_id)
@@ -132,7 +151,7 @@ export default async function OrdersPage() {
       const unitPrice = item.product_price_per_unit || item.price_at_purchase || 0
       return sum + (unitPrice * (item.quantity || 0))
     }, 0)
-    
+
     return {
       ...order,
       items,
