@@ -3,12 +3,13 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { Package, ShoppingCart, TrendingUp, Grid3x3, Settings, LogOut, Menu, X } from "lucide-react"
+import { Package, ShoppingCart, TrendingUp, Grid3x3, Settings, LogOut, Menu, X, Percent } from "lucide-react"
 
 const menuItems = [
   { label: "Overview", icon: Grid3x3, href: "/dashboard" },
   { label: "Products", icon: Package, href: "/myproducts" },
   { label: "Orders", icon: ShoppingCart, href: "/orders" },
+  { label: "Discounts", icon: Percent, href: "/discounts" },
   { label: "Shipment", icon: TrendingUp, href: "#" },
 ]
 
