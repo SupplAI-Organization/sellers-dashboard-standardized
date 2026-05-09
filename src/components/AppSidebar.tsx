@@ -19,6 +19,7 @@ const menuItems = [
   { label: "Overview", icon: Grid3x3, href: "/dashboard" },
   { label: "Products", icon: Package, href: "/myproducts" },
   { label: "Orders", icon: ShoppingCart, href: "/orders" },
+  { label: "Discounts", icon: Percent, href: "/discounts" },
   { label: "Shipment", icon: TrendingUp, href: "#" },
 ];
 
