@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { AppSidebar } from "@/components/AppSidebar"
 import { AppTopbar } from "@/components/Apptopbar"
@@ -45,12 +46,16 @@ export default function NewProductPage() {
   const [imageError, setImageError] = useState<string | null>(null)
   const [userName, setUserName] = useState("Seller");
   const [userEmail, setUserEmail] = useState("");
+  const [supplierId, setSupplierId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     async function loadUser() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserEmail(user.email || "");
+        setSupplierId(user.id); // Set the supplier_id from the authenticated user
         const { data: profile } = await supabase.from('users').select('contact_person').eq('id', user.id).single();
         if (profile?.contact_person) {
           setUserName(profile.contact_person);
@@ -98,9 +103,47 @@ export default function NewProductPage() {
     setImageError(null)
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    console.log("Form submitted:", form, imageFiles)
+    if (!supplierId) {
+      alert("Error: Supplier context not found. Please re-login.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Format numeric fields properly before inserting to Supabase
+      const productPayload = {
+        ...form,
+        supplier_id: supplierId,
+        price_per_unit: form.price_per_unit ? parseFloat(form.price_per_unit) : null,
+        available_quantity: form.available_quantity ? parseInt(form.available_quantity) : null,
+        minimum_order_quantity: form.minimum_order_quantity ? parseInt(form.minimum_order_quantity) : null,
+        max_discount: form.max_discount ? parseFloat(form.max_discount) : null,
+        lead_time_days: form.lead_time_days ? parseInt(form.lead_time_days) : null,
+        reorder_threshold: form.reorder_threshold ? parseInt(form.reorder_threshold) : null,
+      };
+
+      const { data, error } = await supabase
+        .from('products')
+        .insert([productPayload])
+        .select();
+
+      if (error) {
+        console.error("Supabase Error:", error);
+        alert(`Failed to create product: ${error.message}`);
+        return;
+      }
+
+      alert("Product created successfully!");
+      router.push("/myproducts");
+    } catch (err) {
+      console.error("Submission Error:", err);
+      alert("An unexpected error occurred while creating the product.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -450,17 +493,20 @@ export default function NewProductPage() {
               <div className="flex gap-4 justify-end pt-4 pb-8">
                 <Button
                   variant="outline"
-                  asChild
-                  className="px-6 font-medium border-neutral-200 text-neutral-600 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors"
+                  type="button"
+                  onClick={() => router.push("/myproducts")}
+                  disabled={isSubmitting}
+                  className="px-6 font-medium border-neutral-200 text-neutral-600 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors cursor-pointer"
                 >
-                  <Link href="/myproducts">Cancel</Link>
+                  Cancel
                 </Button>
                 <Button
                   type="submit"
+                  disabled={isSubmitting}
                   className="text-white font-medium px-8 shadow-sm hover:opacity-90 transition-opacity rounded-lg"
                   style={{backgroundColor: 'var(--dashboard-primary)'}}
                 >
-                  Create Product
+                  {isSubmitting ? "Creating..." : "Create Product"}
                 </Button>
               </div>
             </form>
