@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Sparkles,
+  Percent,
 } from "lucide-react";
 
 const menuItems = [
